@@ -19,8 +19,8 @@ const char* keys = {
 
 cv::Mat removeLight(cv::Mat img, cv::Mat pattern, int method);
 cv::Mat calculateLightPattern(cv::Mat img);
-void connectedComponents(cv::Mat img);
-void connectedComponentsStats(cv::Mat img);
+void connectedComponents(cv::Mat img, bool show_stats=true);
+
 void findContoursBasic(cv::Mat img);
 static cv::Scalar randomColor(cv::RNG &rng);
 cv::Mat removeImageNoise(cv::Mat img, std::string algo="blur");
@@ -56,16 +56,12 @@ int main(int argc, const char **argv){
 	cv::Mat img_no_noise = removeImageNoise(img);
 	cv::Mat light_no_noise = removeImageNoise(light_pattern);
 	cv::Mat img_no_light = removeLight(img_no_noise, light_no_noise, method_light);
-	cv::Mat img_thr = getThresholdedImage(img_no_light, method_light);	
-			
-	connectedComponentsStats(img_thr);
+	cv::Mat img_thr = getThresholdedImage(img_no_light, method_light);			
+	connectedComponents(img_thr);
 	findContoursBasic(img_thr);
 	cv::imshow("Original image", img);
-	//cv::imshow("Image mask", img_mask);
-	cv::imshow("Gassuain blur", img_no_noise);
-	//cv::imshow("Light pattern", light_pattern);
-	cv::imshow("Image no light", img_no_light);
-	//cv::imshow("Created pattern", created_pattern);
+	cv::imshow("Light pattern", light_pattern);
+	cv::imshow("Image no light", img_no_light);	
 	cv::imshow("Image threshold", img_thr);
 	cv::waitKey(0);
 	return 0;
@@ -107,9 +103,9 @@ cv::Mat calculateLightPattern(cv::Mat img){
 	return pattern;
 }
 
-void connectedComponents(cv::Mat img){
-	cv::Mat labels;
-	int num_objects = cv::connectedComponents(img, labels);
+void connectedComponents(cv::Mat img, bool show_stats){
+	cv::Mat labels, stats, centroids;
+	int num_objects = (show_stats) ? cv::connectedComponentsWithStats(img, labels, stats, centroids): cv::connectedComponents(img, labels);
 	if(num_objects < 2){
 		std::cout<<"No objects detected"<<std::endl;
 		return;
@@ -122,35 +118,11 @@ void connectedComponents(cv::Mat img){
 	for(int i=1; i<num_objects;i++){
 		cv::Mat mask = labels == i;
 		output.setTo(randomColor(rng), mask);
-	}
-	cv::imshow("Result", output);
-	cv::waitKey(0);
-}
-
-void connectedComponentsStats(cv::Mat img){
-	cv::Mat labels, stats, centroids;
-	int num_objects = cv::connectedComponentsWithStats(img, labels, stats, centroids);
-	if(num_objects < 2){
-		std::cout<<"No objects detected"<<std::endl;
-		return;
-	}
-	else{
-		std::cout<<"Number of objects detected: "<<num_objects - 1<<std::endl;
-	}
-	cv::Mat output = cv::Mat::zeros(img.rows, img.cols, CV_8UC3);
-	cv::RNG rng(0xFFFFFFFF);
-	for(int i = 1;i<num_objects;i++){
-		std::cout<<"Object: "<<i << "With pos: "<<centroids.at<cv::Point2d>(i)<<" with area "<<stats.at<int>(i, cv::CC_STAT_AREA) <<std::endl;
-		cv::Mat mask = labels == i;
-		output.setTo(randomColor(rng), mask);
-		std::stringstream ss;
-		ss << "area: "<<stats.at<int>(i, cv::CC_STAT_AREA);
-		putText(output,
-				ss.str(),
-				centroids.at<cv::Point2d>(i),
-				cv::FONT_HERSHEY_SIMPLEX, 
-				0.4,
-				cv::Scalar(255, 255, 255));
+		if(show_stats){
+			std::stringstream ss;
+			ss << "area: "<<stats.at<int>(i, cv::CC_STAT_AREA);
+			putText(output, ss.str(), centroids.at<cv::Point2d>(i), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255, 255, 255));
+		}
 	}
 	cv::imshow("Result", output);
 	cv::waitKey(0);
