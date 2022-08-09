@@ -1,12 +1,17 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
+#include <MultipleImageWindow.h>
 
+
+
+MultipleImageWindow *miw;
 
 const char* keys = {
 	"{help h usage ? | | print this message}"
@@ -17,6 +22,8 @@ const char* keys = {
 		"{algo | MOG2 | Background substraction method (KNN, MOG2) }"
 };
 
+
+
 cv::Mat removeLight(cv::Mat img, cv::Mat pattern, int method);
 cv::Mat calculateLightPattern(cv::Mat img);
 void connectedComponents(cv::Mat img, bool show_stats=true);
@@ -26,6 +33,7 @@ static cv::Scalar randomColor(cv::RNG &rng);
 cv::Mat removeImageNoise(cv::Mat img, std::string algo="blur");
 cv::Mat getThresholdedImage(cv::Mat img, int light_method);
 cv::Mat getBackgroundSubstractor(cv::Mat img,std::string background_sub_algo="MOG2");
+std::vector<std::vector<float>> ExtractFeatures(cv::Mat img, std::vector<int> *left=NULL, std::vector<int> *top=NULL);
 int main(int argc, const char **argv){
 	cv::CommandLineParser parser(argc, argv, keys);
 	parser.about("Nasser implementation for object classification");
@@ -33,6 +41,7 @@ int main(int argc, const char **argv){
 		parser.printMessage();
 		return 0;
 	}
+	miw = new MultipleImageWindow("MainWindow", 2, 2, cv::WINDOW_AUTOSIZE);
 	cv::String img_file  = parser.get<cv::String>(0);
 	cv::String light_pattern_file = parser.get<cv::String>(1);
 	int method_light = parser.get<int>("lightMethod");
@@ -53,17 +62,20 @@ int main(int argc, const char **argv){
 		std::cout<<"Error loading image "<<img_file<<std::endl;
 		return -1;
 	}
+
 	cv::Mat img_no_noise = removeImageNoise(img);
 	cv::Mat light_no_noise = removeImageNoise(light_pattern);
 	cv::Mat img_no_light = removeLight(img_no_noise, light_no_noise, method_light);
 	cv::Mat img_thr = getThresholdedImage(img_no_light, method_light);			
-	connectedComponents(img_thr);
-	findContoursBasic(img_thr);
+	//connectedComponents(img_thr);
+	//findContoursBasic(img_thr);	
+	ExtractFeatures(img_thr);
+	/*
 	cv::imshow("Original image", img);
 	cv::imshow("Light pattern", light_pattern);
 	cv::imshow("Image no light", img_no_light);	
 	cv::imshow("Image threshold", img_thr);
-	cv::waitKey(0);
+	cv::waitKey(0);*/
 	return 0;
 }
 
@@ -178,3 +190,43 @@ cv::Mat getBackgroundSubstractor(cv::Mat img, std::string background_sub_algo){
 	return img_mask;
 
 }
+std::vector<std::vector<float>> ExtractFeatures(cv::Mat img, std::vector<int> *left, std::vector<int> *top){
+	std::vector<std::vector<float>> output;
+	std::vector<std::vector<cv::Point>> contours;
+	cv::Mat input = img.clone();
+	std::vector<cv::Vec4i> hierarchy;
+	cv::findContours(input, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
+	if(contours.size() == 0){
+		return output;
+	}
+	cv::RNG rng(0xFFFFFFFF);
+	for(int i = 0;i < contours.size(); i++){
+		cv::Mat mask = cv::Mat::zeros(img.rows, img.cols, CV_8UC1);
+		cv::drawContours(mask, contours, i, cv::Scalar(1), cv::FILLED, cv::LINE_8, hierarchy, 1);
+		cv::Scalar area_s = cv::sum(mask);
+		float area  = area_s[0];	
+		if(area>500) {
+			cv::RotatedRect r = cv::minAreaRect(contours[i]);
+			float width = r.size.width;
+			float height = r.size.height;
+			float ar = (width<height) ? height / width:width / height;
+			std::vector<float> row;
+			row.push_back(area);
+			row.push_back(ar);
+			output.push_back(row);
+			if(left != NULL){
+				left->push_back((int) r.center.x);
+			}
+			if(top != NULL){
+				top->push_back((int) r.center.y);
+			}
+			std::cout<<"Area: "<<area<<std::endl;
+			miw->addImage("Extract features", mask*255);
+			miw->render();
+			
+		}
+	}
+cv::waitKey(0);
+		return output;
+}
+
