@@ -13,3 +13,7 @@ Vinicius Godoy
 
 *Note: It's not complete yet, only feature extraction and image preprocessing are complete, but as I don't work on it often, I preferred to share it with u, but it compiles without errors xD xD
 
+
+https://user-images.githubusercontent.com/24785730/184236779-d7622177-1e41-4220-af6a-4e280e2c6ebe.mp4
+
+
