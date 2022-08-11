@@ -8,7 +8,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
 #include <MultipleImageWindow.h>
-
+#include <ImagePreprocessing.hpp>
 
 MultipleImageWindow *miw;
 const std::string DATASET_ROOT_DIR = "../Dataset/dataset_white_background/data/";
@@ -27,23 +27,18 @@ const char* keys = {
 		"{algo | MOG2 | Background substraction method (KNN, MOG2) }"
 };
 
-cv::Mat light_pattern;
+std::string light_pattern_file;
 
 
-cv::Mat removeLight(cv::Mat img, cv::Mat pattern, int method);
-cv::Mat calculateLightPattern(cv::Mat img);
 void connectedComponents(cv::Mat img, bool show_stats=true);
 
 void findContoursBasic(cv::Mat img);
 static cv::Scalar randomColor(cv::RNG &rng);
-cv::Mat removeImageNoise(cv::Mat img, std::string algo="blur");
-cv::Mat getThresholdedImage(cv::Mat img, int light_method);
-cv::Mat getBackgroundSubstractor(cv::Mat img,std::string background_sub_algo="MOG2");
 std::vector<std::vector<float>> ExtractFeatures(cv::Mat img, std::vector<int> *left=NULL, std::vector<int> *top=NULL);
 bool readFolderAndExtractFeatures(std::string folder, int label, int num_for_test, std::vector<float> &training_data, 
 		std::vector<int> &responses_data, std::vector<float> &testing_data, std::vector<int> &testResponesData);
 void trainAndTest();
-cv::Mat preprocessImage(cv::Mat input);
+
 
 
 int main(int argc, const char **argv){
@@ -55,7 +50,7 @@ int main(int argc, const char **argv){
 	}
 	miw = new MultipleImageWindow("MainWindow", 2, 2, cv::WINDOW_AUTOSIZE);
 	cv::String img_file  = parser.get<cv::String>(0);
-	cv::String light_pattern_file = parser.get<cv::String>(1);
+	light_pattern_file = parser.get<cv::String>(1);
 	int method_light = parser.get<int>("lightMethod");
 	int method_seg = parser.get<int>("segMethod");
 	cv::String background_sub_algo = parser.get<cv::String>("algo");
@@ -65,61 +60,17 @@ int main(int argc, const char **argv){
 		return 0;
 	}
 	cv::Mat img = cv::imread(img_file, 0);
-	light_pattern = cv::imread(light_pattern_file, 0);
-	if (light_pattern.data == NULL)
-	{
-		light_pattern = calculateLightPattern(img);
-	}	
+	
+	
 	if(img.data == NULL){
 		std::cout<<"Error loading image "<<img_file<<std::endl;
 		return -1;
-	}
-
-	cv::Mat img_no_noise = removeImageNoise(img);
-	cv::Mat light_no_noise = removeImageNoise(light_pattern);
-	cv::Mat img_no_light = removeLight(img_no_noise, light_no_noise, method_light);
-	cv::Mat img_thr = getThresholdedImage(img_no_light, method_light);			
+	}			
 	//connectedComponents(img_thr);
 	//findContoursBasic(img_thr);	
-	ExtractFeatures(img_thr);
+	
 	trainAndTest();
 	return 0;
-}
-
-cv::Mat getThresholdedImage(cv::Mat img, int light_method){
-	switch(light_method){
-		case 1:
-			cv::threshold(img, img, 40, 255, cv::THRESH_BINARY);
-			break;
-		case 2:
-			cv::threshold(img, img, 140, 255, cv::THRESH_BINARY_INV);
-			break;
-		default:
-			img = img;
-	}
-	return img;
-
-}
-cv::Mat removeLight(cv::Mat img, cv::Mat pattern, int method){
-	cv::Mat aux;	
-	if(method == 1){
-		cv::Mat img32, pattern32;
-		img.convertTo(img32, CV_32F);
-		pattern.convertTo(pattern32, CV_32F);
-		aux = 1 - (img32/pattern32);
-		aux = aux*255;
-		aux.convertTo(aux, CV_8U);
-	}
-	else {
-		aux = pattern - img;
-	}
-	return aux;
-}
-
-cv::Mat calculateLightPattern(cv::Mat img){
-	cv::Mat pattern;
-	cv::blur(img, pattern, cv::Size(img.cols/3, img.rows/3));
-	return pattern;
 }
 
 void connectedComponents(cv::Mat img, bool show_stats){
@@ -172,31 +123,7 @@ cv::Scalar randomColor(cv::RNG &rng){
 	return cv::Scalar(icolor &255, (icolor>>8)&255, (icolor>>16)&255);
 }
 
-cv::Mat removeImageNoise(cv::Mat img, std::string algo){
-	if (algo == "blur"){
-		cv::medianBlur(img, img, 3);
-		cv::blur(img, img, cv::Size(3, 3));
-	}
-	else if (algo == "gaussian"){
-		int sigma = 3;
-		int ksize = 5;
-		cv::GaussianBlur(img, img, cv::Size(ksize, ksize), sigma, sigma);
-	}
-	return img;
-}
-cv::Mat getBackgroundSubstractor(cv::Mat img, std::string background_sub_algo){
-	cv::Ptr<cv::BackgroundSubtractor> pBackSub;
-	if(background_sub_algo == "MOG2"){
-		pBackSub = cv::createBackgroundSubtractorMOG2();
-	}
-	else{
-		pBackSub = cv::createBackgroundSubtractorKNN();
-	}
-	cv::Mat img_mask;	
-	pBackSub->apply(img, img_mask);	
-	return img_mask;
 
-}
 std::vector<std::vector<float>> ExtractFeatures(cv::Mat img, std::vector<int> *left, std::vector<int> *top){
 	std::vector<std::vector<float>> output;
 	std::vector<std::vector<cv::Point>> contours;
@@ -248,12 +175,14 @@ bool readFolderAndExtractFeatures(std::string folder, int label, int num_for_tes
 		std::cout<<"Can not open the folder images"<<std::endl;
 		return false;
 	}
+	ImagePreprocessing *image_preprocessor = new ImagePreprocessing(light_pattern_file);
+	
 	cv::Mat frame;
 	int img_index = 0;
 	while(images.read(frame)){
 		cv::imshow("Original image", frame);
 		cv::waitKey(10);
-		cv::Mat pre = preprocessImage(frame);
+		cv::Mat pre = image_preprocessor->preprocessImage(frame);
 		std::vector<std::vector<float>> features = ExtractFeatures(pre);
 		for(int i = 0;i < features.size(); i++){
 			std::cout<<"Image index: "<<img_index<<std::endl;
@@ -293,15 +222,4 @@ void trainAndTest(){
 	svm->setType(cv::ml::SVM::C_SVC);
 	svm->setKernel(cv::ml::SVM::CHI2);
 	svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 100, 1e-6));
-}
-
-cv::Mat preprocessImage(cv::Mat input){
-	cv::Mat result;
-	cv::Mat img_noise, img_box_smooth;
-	cv::medianBlur(input, img_noise, 3);
-	cv::Mat img_no_light;
-	img_noise.copyTo(img_no_light);
-	img_no_light = removeLight(img_noise, light_pattern, 0);
-	cv::threshold(img_no_light, result, 30, 255, cv::THRESH_BINARY);
-	return result;
 }

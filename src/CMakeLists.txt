@@ -1,1 +1,2 @@
-ADD_LIBRARY(utils MultipleImageWindow.cpp)
+ADD_LIBRARY(multiple_image_window MultipleImageWindow.cpp)
+ADD_LIBRARY(image_preprocessing ImagePreprocessing.cpp)
