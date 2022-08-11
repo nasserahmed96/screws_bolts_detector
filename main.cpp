@@ -10,8 +10,13 @@
 #include <MultipleImageWindow.h>
 
 
-
 MultipleImageWindow *miw;
+const std::string DATASET_ROOT_DIR = "../Dataset/dataset_white_background/data/";
+const std::string NUTS_DIR = DATASET_ROOT_DIR +  "nut/tuerca_%04d.pgm";
+const std::string RINGS_DIR = DATASET_ROOT_DIR + "ring/arandela_%04d.pgm";
+const std::string SCREWS_DIR = DATASET_ROOT_DIR + "screw/tornillo_%04d.pgm";
+
+cv::Ptr<cv::ml::SVM> svm;
 
 const char* keys = {
 	"{help h usage ? | | print this message}"
@@ -22,6 +27,7 @@ const char* keys = {
 		"{algo | MOG2 | Background substraction method (KNN, MOG2) }"
 };
 
+cv::Mat light_pattern;
 
 
 cv::Mat removeLight(cv::Mat img, cv::Mat pattern, int method);
@@ -34,6 +40,12 @@ cv::Mat removeImageNoise(cv::Mat img, std::string algo="blur");
 cv::Mat getThresholdedImage(cv::Mat img, int light_method);
 cv::Mat getBackgroundSubstractor(cv::Mat img,std::string background_sub_algo="MOG2");
 std::vector<std::vector<float>> ExtractFeatures(cv::Mat img, std::vector<int> *left=NULL, std::vector<int> *top=NULL);
+bool readFolderAndExtractFeatures(std::string folder, int label, int num_for_test, std::vector<float> &training_data, 
+		std::vector<int> &responses_data, std::vector<float> &testing_data, std::vector<int> &testResponesData);
+void trainAndTest();
+cv::Mat preprocessImage(cv::Mat input);
+
+
 int main(int argc, const char **argv){
 	cv::CommandLineParser parser(argc, argv, keys);
 	parser.about("Nasser implementation for object classification");
@@ -53,7 +65,7 @@ int main(int argc, const char **argv){
 		return 0;
 	}
 	cv::Mat img = cv::imread(img_file, 0);
-	cv::Mat light_pattern = cv::imread(light_pattern_file, 0);
+	light_pattern = cv::imread(light_pattern_file, 0);
 	if (light_pattern.data == NULL)
 	{
 		light_pattern = calculateLightPattern(img);
@@ -70,12 +82,7 @@ int main(int argc, const char **argv){
 	//connectedComponents(img_thr);
 	//findContoursBasic(img_thr);	
 	ExtractFeatures(img_thr);
-	/*
-	cv::imshow("Original image", img);
-	cv::imshow("Light pattern", light_pattern);
-	cv::imshow("Image no light", img_no_light);	
-	cv::imshow("Image threshold", img_thr);
-	cv::waitKey(0);*/
+	trainAndTest();
 	return 0;
 }
 
@@ -220,13 +227,81 @@ std::vector<std::vector<float>> ExtractFeatures(cv::Mat img, std::vector<int> *l
 			if(top != NULL){
 				top->push_back((int) r.center.y);
 			}
-			std::cout<<"Area: "<<area<<std::endl;
+			
 			miw->addImage("Extract features", mask*255);
 			miw->render();
+			cv::waitKey(10);
 			
 		}
 	}
-cv::waitKey(0);
+
 		return output;
 }
 
+
+bool readFolderAndExtractFeatures(std::string folder, int label, int num_for_tests, std::vector<float> &trainingData, 
+		std::vector<int> &responsesData, std::vector<float> &testingData, std::vector<float> &testingResponsesData){
+	cv::VideoCapture images;
+	std::cout<<"Start reading "<<folder<<std::endl;
+	std::cout<<"Num for tests: "<<num_for_tests<<std::endl;
+	if(images.open(folder) == false){
+		std::cout<<"Can not open the folder images"<<std::endl;
+		return false;
+	}
+	cv::Mat frame;
+	int img_index = 0;
+	while(images.read(frame)){
+		cv::imshow("Original image", frame);
+		cv::waitKey(10);
+		cv::Mat pre = preprocessImage(frame);
+		std::vector<std::vector<float>> features = ExtractFeatures(pre);
+		for(int i = 0;i < features.size(); i++){
+			std::cout<<"Image index: "<<img_index<<std::endl;
+			if(img_index >= num_for_tests){
+				trainingData.push_back(features[i][0]);
+				trainingData.push_back(features[i][1]);
+				responsesData.push_back(label);
+			}
+			else {
+				testingData.push_back(features[i][0]);
+				testingData.push_back(features[i][1]);
+				testingResponsesData.push_back((float) label);
+			}
+		}
+		img_index++;
+
+	}
+	return true;
+}
+
+void trainAndTest(){
+	std::vector<float> trainingData;
+	std::vector<int> responsesData;
+	std::vector<float> testData;
+	std::vector<float> testResponsesData;
+	int num_for_tests = 20;
+	readFolderAndExtractFeatures(RINGS_DIR, 0, num_for_tests, trainingData, responsesData, testData, testResponsesData);
+	readFolderAndExtractFeatures(NUTS_DIR, 1, num_for_tests, trainingData, responsesData, testData, testResponsesData);
+	readFolderAndExtractFeatures(SCREWS_DIR, 2, num_for_tests, trainingData, responsesData, testData, testResponsesData);
+	std::cout<<"Num of traingin examples: "<<responsesData.size()<<std::endl;
+	std::cout<<"Num of testing examples: "<<testResponsesData.size()<<std::endl;
+	cv::Mat trainingDataMat(trainingData.size()/2, 2, CV_32FC1, &trainingData[0]);
+	cv::Mat responses(responsesData.size(), 1, CV_32SC1, &responsesData[0]);
+	cv::Mat testDataMat(testData.size() / 2, 2, CV_32FC1, &testData[0]);
+	cv::Mat testResponses(testResponsesData.size(), 1, CV_32FC1, &testResponsesData[0]);
+	svm = cv::ml::SVM::create();
+	svm->setType(cv::ml::SVM::C_SVC);
+	svm->setKernel(cv::ml::SVM::CHI2);
+	svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 100, 1e-6));
+}
+
+cv::Mat preprocessImage(cv::Mat input){
+	cv::Mat result;
+	cv::Mat img_noise, img_box_smooth;
+	cv::medianBlur(input, img_noise, 3);
+	cv::Mat img_no_light;
+	img_noise.copyTo(img_no_light);
+	img_no_light = removeLight(img_noise, light_pattern, 0);
+	cv::threshold(img_no_light, result, 30, 255, cv::THRESH_BINARY);
+	return result;
+}

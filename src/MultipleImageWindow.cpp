@@ -54,7 +54,7 @@ void MultipleImageWindow::removeImage(int pos){
 
 void MultipleImageWindow::render(){
 	this->canvas.setTo(cv::Scalar(20, 20, 20));
-	std::cout<<"Images size: "<<this->images.size()<<std::endl;
+	
 	int cell_width = (this->canvas_width/this->cols);
 	int cell_height = (this->canvas_height/this->rows);
 	int max_images = (this->images.size()>cols*rows)?cols*rows:this->images.size();
