@@ -10,13 +10,10 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
-#include <MultipleImageWindow.h>
+
 
 
 class ImagePreprocessing{
-
-
-
 	public:
 		explicit ImagePreprocessing(std::string &light_pattern_file_path);
 		cv::Mat removeImageNoise(cv::Mat img, std::string algo="blur");

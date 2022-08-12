@@ -1,2 +1,5 @@
 ADD_LIBRARY(multiple_image_window MultipleImageWindow.cpp)
 ADD_LIBRARY(image_preprocessing ImagePreprocessing.cpp)
+ADD_LIBRARY(image_segmentation ImageSegmentation.cpp)
+ADD_LIBRARY(image_extract_features ImageExtractFeatures.cpp)
+ADD_LIBRARY(training_and_testing TrainingAndTesting.cpp)

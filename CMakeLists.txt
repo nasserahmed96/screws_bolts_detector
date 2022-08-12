@@ -7,9 +7,6 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 MESSAGE ("OpenCV include: ${OpenCV_INCLUDE_DIRS}")
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 ADD_SUBDIRECTORY(src)
-SET(MultipleImageWindow ${MultipleImageWindow} multiple_image_window)
-SET(ImagePreprocessing ${ImagePreprocessing} image_preprocessing)
-
+SET(EXTRA_LIBS ${OpenCV_LIBS} training_and_testing image_extract_features image_segmentation image_preprocessing multiple_image_window)
 ADD_EXECUTABLE(${PROJECT_NAME} main.cpp)
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${MultipleImageWindow} ${OpenCV_LIBS} ${ImagePreprocessing})
-
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${EXTRA_LIBS})
