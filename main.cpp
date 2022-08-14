@@ -39,9 +39,10 @@ int main(int argc, const char **argv){
 	if(img.data == NULL){
 		std::cout<<"Error loading image "<<img_file<<std::endl;
 		return -1;
-	}			
+	}		
 	TrainingAndTesting *trainer = new TrainingAndTesting();
-	trainer->trainAndTest(light_pattern_file);
+	cv::Ptr<cv::ml::SVM> svm_model = trainer->trainAndTest(light_pattern_file);
+	trainer->predict(img, light_pattern_file, svm_model);
 	return 0;
 }
 

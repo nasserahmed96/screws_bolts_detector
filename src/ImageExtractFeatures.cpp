@@ -5,11 +5,14 @@ ImageExtractFeatures::ImageExtractFeatures(){
 	this->miw = new MultipleImageWindow("MainWindow", 2, 2, cv::WINDOW_AUTOSIZE);
 }
 
-std::vector<std::vector<float>> ImageExtractFeatures::extractFeatures(cv::Mat img, std::vector<int> *left, std::vector<int> *top){	
+std::vector<std::vector<float>> ImageExtractFeatures::extractFeatures(cv::Mat img, std::string light_pattern_file, std::vector<int> *left, std::vector<int> *top){	
+	//It should now take a normal image and make the preprocessing step here
+	ImagePreprocessing *image_preprocessor = new ImagePreprocessing(light_pattern_file);
+	cv::Mat pre_processed_image = image_preprocessor->preprocessImage(img);
 	std::vector<std::vector<float>> output;
 	std::vector<cv::Vec4i> hierarchy;
 	std::vector<std::vector<cv::Point>> contours;
-	cv::Mat input = img.clone();
+	cv::Mat input = pre_processed_image.clone();
 	cv::findContours(input, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
 	if(contours.size() == 0){
 		return output;
@@ -54,15 +57,13 @@ bool ImageExtractFeatures::readFolderAndExtractFeatures(std::string folder, int 
 		std::cout<<"Can not open the folder images"<<std::endl;
 		return false;
 	}
-	ImagePreprocessing *image_preprocessor = new ImagePreprocessing(light_pattern_file);
-	
+		
 	cv::Mat frame;
 	int img_index = 0;
 	while(images.read(frame)){
 		cv::imshow("Original image", frame);
-		cv::waitKey(10);
-		cv::Mat pre = image_preprocessor->preprocessImage(frame);
-		std::vector<std::vector<float>> features = this->extractFeatures(pre);
+		cv::waitKey(10);	
+		std::vector<std::vector<float>> features = this->extractFeatures(frame, light_pattern_file);
 		for(int i = 0;i < features.size(); i++){
 			std::cout<<"Image index: "<<img_index<<std::endl;
 			if(img_index >= num_for_tests){
