@@ -70,7 +70,7 @@ cv::Mat ImagePreprocessing::getBackgroundSubstractor(cv::Mat img, std::string ba
 cv::Mat ImagePreprocessing::preprocessImage(cv::Mat input){
 	cv::Mat result;
 	cv::Mat img_noise, img_box_smooth;
-	img_noise = this->removeImageNoise(input);
+	img_noise = this->removeImageNoise(input, "gaussian");
 	cv::Mat img_no_light;
 	img_noise.copyTo(img_no_light);
 	img_no_light = removeLight(img_noise, 1);	
