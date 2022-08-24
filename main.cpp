@@ -3,6 +3,14 @@
 #include <sstream>
 #include <vector>
 #include <TrainingAndTesting.hpp>
+#include <AListADT.hpp>
+
+/*
+ * Please Allah, 
+ * forigve me for my all sins, 
+ * I'm such a weak person who can not determine his destination, 
+ * I enjoy the journey but it's too hard, I'm only seeking forgiveness from you
+ */
 
 const char* keys = {
 	"{help h usage ? | | print this message}"
@@ -39,7 +47,9 @@ int main(int argc, const char **argv){
 	if(img.data == NULL){
 		std::cout<<"Error loading image "<<img_file<<std::endl;
 		return -1;
-	}		
+	}
+
+	AListADT<int> *listADT;
 	TrainingAndTesting *trainer = new TrainingAndTesting();
 	cv::Ptr<cv::ml::SVM> svm_model = trainer->trainAndTest(light_pattern_file);
 	trainer->predict(img, light_pattern_file, svm_model);

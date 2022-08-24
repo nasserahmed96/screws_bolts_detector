@@ -16,8 +16,8 @@ class ListADT{
 		virtual void moveToEnd() = 0;
 		virtual void prev() = 0;
 		virtual void next() = 0;
-		virtual int currPos() = 0;
-		virtual void moveToPos() = 0;
+		virtual int currPos() const = 0;
+		virtual void moveToPos(int pos) const = 0;
 		virtual const E& getValue() const = 0;
 };
 #endif
