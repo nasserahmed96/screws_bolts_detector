@@ -4,6 +4,7 @@
 #include <vector>
 #include <TrainingAndTesting.hpp>
 #include <AListADT.hpp>
+#include "run_tests.cpp"
 
 /*
  * Please Allah, 
@@ -48,9 +49,10 @@ int main(int argc, const char **argv){
 		std::cout<<"Error loading image "<<img_file<<std::endl;
 		return -1;
 	}
-	TrainingAndTesting *trainer = new TrainingAndTesting();
+	runTests();
+	/*TrainingAndTesting *trainer = new TrainingAndTesting();
 	cv::Ptr<cv::ml::SVM> svm_model = trainer->trainAndTest(light_pattern_file);
-	trainer->predict(img, light_pattern_file, svm_model);
+	trainer->predict(img, light_pattern_file, svm_model);*/
 	return 0;
 }
 
