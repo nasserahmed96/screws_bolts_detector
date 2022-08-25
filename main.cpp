@@ -49,10 +49,11 @@ int main(int argc, const char **argv){
 		return -1;
 	}
 
-	AListADT<int> *listADT;
-	TrainingAndTesting *trainer = new TrainingAndTesting();
-	cv::Ptr<cv::ml::SVM> svm_model = trainer->trainAndTest(light_pattern_file);
-	trainer->predict(img, light_pattern_file, svm_model);
+	AListADT<int> *listADT = new AListADT<int>//();
+	listADT->append(5);
+	//TrainingAndTesting *trainer = new TrainingAndTesting();
+	//cv::Ptr<cv::ml::SVM> svm_model = trainer->trainAndTest(light_pattern_file);
+	//trainer->predict(img, light_pattern_file, svm_model);
 	return 0;
 }
 
