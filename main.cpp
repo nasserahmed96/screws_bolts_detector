@@ -48,12 +48,9 @@ int main(int argc, const char **argv){
 		std::cout<<"Error loading image "<<img_file<<std::endl;
 		return -1;
 	}
-
-	AListADT<int> *listADT = new AListADT<int>//();
-	listADT->append(5);
-	//TrainingAndTesting *trainer = new TrainingAndTesting();
-	//cv::Ptr<cv::ml::SVM> svm_model = trainer->trainAndTest(light_pattern_file);
-	//trainer->predict(img, light_pattern_file, svm_model);
+	TrainingAndTesting *trainer = new TrainingAndTesting();
+	cv::Ptr<cv::ml::SVM> svm_model = trainer->trainAndTest(light_pattern_file);
+	trainer->predict(img, light_pattern_file, svm_model);
 	return 0;
 }
 
