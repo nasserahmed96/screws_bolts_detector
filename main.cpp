@@ -49,7 +49,7 @@ int main(int argc, const char **argv){
 		std::cout<<"Error loading image "<<img_file<<std::endl;
 		return -1;
 	}
-	//runTests();
+	runTests();
 	/*TrainingAndTesting *trainer = new TrainingAndTesting();
 	cv::Ptr<cv::ml::SVM> svm_model = trainer->trainAndTest(light_pattern_file);
 	trainer->predict(img, light_pattern_file, svm_model);*/
