@@ -1,0 +1,1 @@
+ADD_LIBRARY(tests_templates INTERFACE)

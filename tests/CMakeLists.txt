@@ -1,1 +1,2 @@
-ADD_LIBRARY(alist_adt_test INTERFACE)
+ADD_LIBRARY(run_tests run_tests.cpp)
+
