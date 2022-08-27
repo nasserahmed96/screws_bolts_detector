@@ -11,8 +11,9 @@
  *  Any way, unlike assertion I want to continue running tests to get an overview of the failers of the system, and if the errors are greater than 1 then I will ask the user
  *  to check the PDF report
  */
-//void generateStartupErrors(const std::vector<Error>& errors);
-//void printErrorsVector(const std::vector<Error>& errors);
+
+void generateStartupErrors(const std::vector<Error>& errors);
+void printErrorsVector(const std::vector<Error>& errors);
 
 
 int runTests(){
@@ -33,13 +34,13 @@ int runTests(){
 	}
 	if(errors.size() > 0){
 		std::cout<<"Couldn't start the system please check the error report"<<std::endl;
-		//generateStartupErrors(errors);
+		generateStartupErrors(errors);
 	}
 	return 0;
 
 }
 
-/*
+
 void generateStartupErrors(const std::vector<Error>& errors){
 	std::vector<Error> tags_errors;
 	std::string row = "<tr> {{ cols }} </tr>";
@@ -52,8 +53,10 @@ void generateStartupErrors(const std::vector<Error>& errors){
 
 }
 
+
 void printErrorsVector(const std::vector<Error>& errors){
 	for(int i = 0;i < errors.size();i++){
+		std::string error_msg = errors[i].getErrorMessage();
 		std::cout<<errors[i].getErrorMessage()<<std::endl;
 	}
-}*/
+}

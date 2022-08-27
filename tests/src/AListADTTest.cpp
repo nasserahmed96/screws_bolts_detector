@@ -13,7 +13,7 @@ void AListADTTest::appendingMultipleIntegerElements(){
 			newList->append(12);
 			for(newList->moveToStart(); newList->currPos() < newList->length(); newList->next()){
 				if(integers_list[newList->currPos()] != newList->getValue()){
-					throw Error {};
+					throw Error {error_function, "Error in appending new integer to the list"};
 				}
 			std::cout<<"AListADT function works as expected"<<std::endl;
 			}
