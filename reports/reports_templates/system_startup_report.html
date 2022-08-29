@@ -1,9 +1,33 @@
 <html>
 	<head>
 		<title>System startup report</title>
-	</head>
+	</head><head>
+<style>
+#errors {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#errors td, #errors th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#errors tr:nth-child(even){background-color: #f2f2f2;}
+
+#errors tr:hover {background-color: #ddd;}
+
+#errors th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #04AA6D;
+  color: white;
+}
+</style>
 	<body>
-		<table>
+		<table id="errors">
 			<th>
 				Error function
 			</th>

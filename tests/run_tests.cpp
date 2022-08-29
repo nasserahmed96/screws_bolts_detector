@@ -1,4 +1,9 @@
+#include <fstream>
+#include <iostream>
+#include <iomanip>
+#include <string>
 #include <vector>
+#include <regex>
 #include "AListADTTest.hpp"
 
 
@@ -11,6 +16,9 @@
  *  Any way, unlike assertion I want to continue running tests to get an overview of the failers of the system, and if the errors are greater than 1 then I will ask the user
  *  to check the PDF report
  */
+
+
+
 
 void generateStartupErrors(const std::vector<Error>& errors);
 void printErrorsVector(const std::vector<Error>& errors);
@@ -43,13 +51,43 @@ int runTests(){
 
 void generateStartupErrors(const std::vector<Error>& errors){
 	std::vector<Error> tags_errors;
-	std::string row = "<tr> {{ cols }} </tr>";
-	std::string col = "<td> {{ content }} </td>";
-	
+	std::string rows = "";
+	std::string matching_variable = "errors";	
 	for(int i = 0;i < errors.size(); i++){
 		tags_errors.push_back(errors[i]);
+		std::string row = "<tr><td>" + errors[i].getErrorFunction() + "</td><td>" + errors[i].getErrorMessage() + "</tr><td>";
+		rows += row;
 	}
 	printErrorsVector(tags_errors);
+	std::string report_template {"system_startup_report.html"};
+	std::ifstream inFile {report_template};
+	if(!inFile){
+		std::cout <<"Faield to open file"<< report_template <<std::endl;
+		
+	}
+	std::string line {};
+	std::string report_body {};
+	size_t count {};
+	size_t perline {6};
+	char c;
+	while(getline(inFile, line)){
+		if(line.empty()){
+			continue;
+		}
+		std::istringstream iss(line);
+		
+	        report_body += line;	
+	}
+	std::cout<<"One line text: "<<std::endl;
+	std::cout<<report_body<<std::endl;
+	inFile.close();
+	std::cout<<"Report body"<<std::endl<<report_body<<std::endl;
+	std::regex errors_regx ("(\\{){2}(\\s)*" + matching_variable + "(\\s)*(\\}){2}");
+	std::string rendered_errors = std::regex_replace(report_body, errors_regx, rows);
+	std::cout<<"Errors: "<<std::endl<<rendered_errors<<std::endl;
+	std::ofstream outReportStream {"rendered_report.html"};
+	outReportStream<<rendered_errors;
+	outReportStream.close();
 
 }
 
