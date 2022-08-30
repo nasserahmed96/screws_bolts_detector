@@ -29,17 +29,9 @@ int runTests(){
 	 * I will use a string exception for now, until I create the custom exception class
 	 */
 	std::vector<Error> errors;
-	try{
-		AListADTTest *newTest = new AListADTTest(); 
-		newTest->appendingMultipleIntegerElements();
-	}
-	catch(const char *message){
-		std::cout<<message<<std::endl;
-	}	
-	catch(const Error& error)
-	{
-		errors.push_back(error);
-	}
+	AListADTTest *newTest = new AListADTTest(); 
+	errors.push_back(newTest->appendingMultipleIntegerElements());
+	errors.push_back(newTest->clear());
 	if(errors.size() > 0){
 		std::cout<<"Couldn't start the system please check the error report"<<std::endl;
 		generateStartupErrors(errors);
@@ -78,13 +70,9 @@ void generateStartupErrors(const std::vector<Error>& errors){
 		
 	        report_body += line;	
 	}
-	std::cout<<"One line text: "<<std::endl;
-	std::cout<<report_body<<std::endl;
 	inFile.close();
-	std::cout<<"Report body"<<std::endl<<report_body<<std::endl;
 	std::regex errors_regx ("(\\{){2}(\\s)*" + matching_variable + "(\\s)*(\\}){2}");
-	std::string rendered_errors = std::regex_replace(report_body, errors_regx, rows);
-	std::cout<<"Errors: "<<std::endl<<rendered_errors<<std::endl;
+	std::string rendered_errors = std::regex_replace(report_body, errors_regx, rows);	
 	std::ofstream outReportStream {"rendered_report.html"};
 	outReportStream<<rendered_errors;
 	outReportStream.close();

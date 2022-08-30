@@ -10,7 +10,8 @@
 class AListADTTest{
 	public:
 		AListADTTest();
-		void appendingMultipleIntegerElements();
+		Error appendingMultipleIntegerElements();
+		Error clear();
 };
 
 #endif
