@@ -28,13 +28,14 @@ int runTests(){
 	/*
 	 * I will use a string exception for now, until I create the custom exception class
 	 */
-	std::vector<Error> errors;
-	AListADTTest *newTest = new AListADTTest(); 
-	errors.push_back(newTest->appendingMultipleIntegerElements());
-	errors.push_back(newTest->clear());
-	if(errors.size() > 0){
+	std::shared_ptr<std::vector<Error>> errors = std::make_shared<std::vector<Error>>();
+	AListADTTest *newTest = new AListADTTest(errors); 
+	newTest->appendingMultipleIntegerElements();
+	newTest->clear();
+	newTest->printErrors();
+	if(errors->size() > 0){
 		std::cout<<"Couldn't start the system please check the error report"<<std::endl;
-		generateStartupErrors(errors);
+		generateStartupErrors(*errors.get());
 	}
 	return 0;
 
