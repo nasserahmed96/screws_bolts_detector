@@ -40,3 +40,10 @@ void AListADTTest::printErrors(){
 		std::cout<<(*m_errors)[i].getErrorMessage()<<std::endl;
 	}
 }
+
+void AListADTTest::runTests(){
+	this->appendingMultipleIntegerElements();
+	this->clear();
+	this->printErrors();
+
+}

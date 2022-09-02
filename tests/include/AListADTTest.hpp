@@ -18,6 +18,7 @@ class AListADTTest{
 		void appendingMultipleIntegerElements();
 		void clear();
 		void printErrors();
+		void runTests();
 };
 
 #endif
