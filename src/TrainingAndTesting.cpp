@@ -58,7 +58,16 @@ void plotTrainingData(cv::Mat trainingData, cv::Mat labels, float *error=NULL){
 	cv::waitKey(0);
 }
 
-cv::Ptr<cv::ml::SVM> TrainingAndTesting::trainAndTest(std::string light_pattern_file){
+/*
+ *
+ * Use two lists (`dataset_sources` which contain dirs to images, each dir contain images with only one class, and the other list `labels` which contains integers reprsent labels) 
+ * please note that the order of labels MUST be the same as the order of images sources, until I finish the dictionary
+ */
+
+/*
+ * TODO: Use dictionary with key is the label and the value is the dataset source.
+ */
+cv::Ptr<cv::ml::SVM> TrainingAndTesting::trainAndTest(std::vector<std::string> &dataset_sources, std::vector<int> &labels, std::string light_pattern_file){
 	cv::Ptr<cv::ml::SVM> svm;
 	std::vector<float> trainingData;
 	std::vector<int> responsesData;
@@ -66,9 +75,10 @@ cv::Ptr<cv::ml::SVM> TrainingAndTesting::trainAndTest(std::string light_pattern_
 	std::vector<float> testResponsesData;
 	int num_for_tests = 20;
 	ImageExtractFeatures *features_extractor = new ImageExtractFeatures();
-	features_extractor->readFolderAndExtractFeatures(TrainingAndTesting::RINGS_DIR, 0, num_for_tests, trainingData, responsesData, testData, testResponsesData, light_pattern_file);
-	features_extractor->readFolderAndExtractFeatures(TrainingAndTesting::NUTS_DIR, 1, num_for_tests, trainingData, responsesData, testData, testResponsesData, light_pattern_file);
-	features_extractor->readFolderAndExtractFeatures(TrainingAndTesting::SCREWS_DIR, 2, num_for_tests, trainingData, responsesData, testData, testResponsesData, light_pattern_file);
+	for(int i = 0;i < dataset_sources.size();i++) {
+		features_extractor->readFolderAndExtractFeatures(dataset_sources[i], labels[i], 
+				num_for_tests, trainingData, responsesData, testData, testResponsesData, light_pattern_file);
+	}
 	std::cout<<"Num of traingin examples: "<<responsesData.size()<<std::endl;
 	std::cout<<"Num of testing examples: "<<testResponsesData.size()<<std::endl;
 	cv::Mat trainingDataMat(trainingData.size()/2, 2, CV_32FC1, &trainingData[0]);

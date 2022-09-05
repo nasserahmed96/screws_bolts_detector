@@ -30,7 +30,7 @@ int runTests(){
 	 */
 	std::shared_ptr<std::vector<Error>> errors = std::make_shared<std::vector<Error>>();
 	AListADTTest *listTest = new AListADTTest(errors); 
-	newTest->runTests();
+	listTest->runTests();
 	if(errors->size() > 0){
 		std::cout<<"Couldn't start the system please check the error report"<<std::endl;
 		generateStartupErrors(*errors.get());

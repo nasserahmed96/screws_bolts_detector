@@ -7,8 +7,8 @@ ImageExtractFeatures::ImageExtractFeatures(){
 
 std::vector<std::vector<float>> ImageExtractFeatures::extractFeatures(cv::Mat img, std::string light_pattern_file, std::vector<int> *left, std::vector<int> *top){	
 	//It should now take a normal image and make the preprocessing step here
-	ImagePreprocessing *image_preprocessor = new ImagePreprocessing(light_pattern_file);
-	cv::Mat pre_processed_image = image_preprocessor->preprocessImage(img);
+	ImagePreprocessing *image_preprocessor = new ImagePreprocessing(light_pattern_file, img);
+	cv::Mat pre_processed_image = image_preprocessor->preprocessImage();
 	std::vector<std::vector<float>> output;
 	std::vector<cv::Vec4i> hierarchy;
 	std::vector<std::vector<cv::Point>> contours;
