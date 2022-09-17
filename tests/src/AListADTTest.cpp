@@ -13,7 +13,7 @@ void AListADTTest::appendingMultipleIntegerElements(){
 	newList->append(12);
 	for(newList->moveToStart(); newList->currPos() < newList->length(); newList->next())
 		if(integers_list[newList->currPos()] != newList->getValue())
-			m_errors->push_back(Error {error_function, "Error in appending new integer to the list"});
+			m_errors->push_back(Error {__func__, "Error in appending new integer to the list"});
 }
 
 

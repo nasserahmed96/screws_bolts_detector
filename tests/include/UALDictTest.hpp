@@ -2,10 +2,17 @@
 #define UALDICTTEST
 
 #include <iostream>
+#include <memory>
 #include <string>
-class UALDictTest{
+#include <vector>
+#include "Error.hpp"
 
+
+class UALDictTest{
+	private:
+		std::shared_ptr<std::vector<Error>> m_errors;
 	public:
+		UALDictTest(std::shared_ptr<std::vector<Error>> errors);
 		void clear();
 		void insertStringKeyIntValue();
 		int removeStringKeyReturnIntValue();

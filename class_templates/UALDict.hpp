@@ -52,14 +52,7 @@ class UALDict : public DictionaryADT<Key, E>{
 			return list->length();
 		}
 
-		void printDict(){
-			std::cout<<"{\n";
-			for(list->moveToStart(); list->currPos() < list->length(); list->next()){
-				KVPair<Key, E> temp = list->getValue();
-				std::cout<<temp.key()<<":"<<temp.value()<<",\n";
-			}
-			std::cout<<"}\n";
-		}
+
 };
 
 #endif

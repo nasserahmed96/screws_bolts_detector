@@ -30,7 +30,7 @@ int runTests(){
 	 */
 	std::shared_ptr<std::vector<Error>> errors = std::make_shared<std::vector<Error>>();
 	AListADTTest *listTest = new AListADTTest(errors); 
-	UALDictTest *unsorted_list_dict_test = new UALDictTest();
+	UALDictTest *unsorted_list_dict_test = new UALDictTest(errors);
 	listTest->runTests();
 	unsorted_list_dict_test->runTests();
 	if(errors->size() > 0){
