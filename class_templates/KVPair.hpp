@@ -33,7 +33,7 @@ class KVPair{
 		E value(){
 			return e;
 		}
-}
+};
 
-
+#endif
 	

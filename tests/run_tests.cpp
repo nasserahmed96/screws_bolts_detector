@@ -5,7 +5,7 @@
 #include <vector>
 #include <regex>
 #include "AListADTTest.hpp"
-
+#include "UALDictTest.hpp"
 
 /*
  * Nasser 24-08-2022 20:49
@@ -30,7 +30,9 @@ int runTests(){
 	 */
 	std::shared_ptr<std::vector<Error>> errors = std::make_shared<std::vector<Error>>();
 	AListADTTest *listTest = new AListADTTest(errors); 
+	UALDictTest *unsorted_list_dict_test = new UALDictTest();
 	listTest->runTests();
+	unsorted_list_dict_test->runTests();
 	if(errors->size() > 0){
 		std::cout<<"Couldn't start the system please check the error report"<<std::endl;
 		generateStartupErrors(*errors.get());

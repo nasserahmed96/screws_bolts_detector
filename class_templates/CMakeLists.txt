@@ -1,1 +1,2 @@
 ADD_LIBRARY(alist_adt INTERFACE)
+ADD_LIBRARY(ual_dictionary INTERFACE)

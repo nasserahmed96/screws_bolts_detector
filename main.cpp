@@ -2,12 +2,12 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include <TrainingAndTesting.hpp>
-#include <AListADT.hpp>
-#include <run_tests.cpp>
 #include <boost/lambda/lambda.hpp>
 #include <boost/json.hpp>
 #include <iomanip>
+#include <TrainingAndTesting.hpp>
+#include <AListADT.hpp>
+#include <run_tests.cpp>
 
 
 /*
@@ -201,8 +201,8 @@ int main(int argc, const char **argv){
 		parser.printMessage();
 		return 0;
 	}
-	
-	cv::String img_file  = parser.get<cv::String>(0);
+	runTests();	
+	/*cv::String img_file  = parser.get<cv::String>(0);
 	light_pattern_file = parser.get<cv::String>(1);
 	int method_light = parser.get<int>("lightMethod");
 	int method_seg = parser.get<int>("segMethod");
@@ -220,8 +220,8 @@ int main(int argc, const char **argv){
 		return -1;
 	}
 	std::vector<std::string> dataset_sources;
-	std::vector<int> labels;
-	auto const jv = readJSONFile("test_json.json");
+	std::vector<int> labels;*/
+	/*auto const jv = readJSONFile("test_json.json");
 	auto const obj = jv.get_object();
 
 	pretty_print(std::cout, jv); 
@@ -235,7 +235,7 @@ int main(int argc, const char **argv){
 	for(auto value: cache_values){
 		std::cout<<value<<" ";
 	}
-	std::cout<<std::endl;
+	std::cout<<std::endl;*/
 	return 0;
 }
 

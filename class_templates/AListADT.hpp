@@ -46,10 +46,10 @@ class AListADT: public ListADT<E>{
 			return it;
 		}
 		void moveToStart() override{
-			std::cout<<"Implement"<<std::endl;
+			std::cout<<"Implement move to start"<<std::endl;
 		}
 		void moveToEnd() override{	
-			std::cout<<"Implement"<<std::endl;
+			std::cout<<"Implement move to end"<<std::endl;
 		}
 		void prev() override{
 			if ( curr != 0)
