@@ -148,6 +148,41 @@ void pretty_print(std::ostream& os, json::value const& jv, std::string *indent =
 
 }
 
+void add_config_to_cache(std::vector<std::string> &cache_keys, std::vector<std::string> &cache_values, json::value const& jv){
+	switch(jv.kind()){
+		case json::kind::object: 
+			{
+				auto const& obj = jv.get_object();
+				if(!obj.empty()){
+					auto it = obj.begin();
+					for(;;){
+						cache_keys.push_back(json::serialize(it->key()));
+						add_config_to_cache(cache_keys, cache_values, it->value());
+						if(++it == obj.end())
+							break;
+					}
+				}
+				break;
+			}
+		case json::kind::string:
+			{
+				cache_values.push_back(json::serialize(jv.get_string()));
+				break;
+			}
+		case json::kind::bool_:
+			{
+				if(jv.get_bool())
+					cache_values.push_back("true");
+				else
+					cache_values.push_back("false");
+				break;
+			}
+		case json::kind::null:
+			cache_values.push_back("null");
+			break;
+	}
+}
+
 const char* keys = {
 	"{help h usage ? | | print this message}"
 		"{@image || image to process}"
@@ -187,23 +222,20 @@ int main(int argc, const char **argv){
 	std::vector<std::string> dataset_sources;
 	std::vector<int> labels;
 	auto const jv = readJSONFile("test_json.json");
-	pretty_print(std::cout, jv);
-	//ImageExtractFeatures *features_extractor = new ImageExtractFeatures();
-	//features_extractor->extractFeatures(img);
-	
-	/*labels.push_back(0);
-	labels.push_back(1);
-	labels.push_back(2);
+	auto const obj = jv.get_object();
 
-	std::string DATASET_ROOT_DIR = "../Dataset/dataset_white_background/data/";
-	dataset_sources.push_back(DATASET_ROOT_DIR +  "nut/tuerca_%04d.pgm");
-	dataset_sources.push_back(DATASET_ROOT_DIR + "ring/arandela_%04d.pgm");
-	dataset_sources.push_back(DATASET_ROOT_DIR + "screw/tornillo_%04d.pgm");
-	//dataset_sources.push_back("../Dataset/MvTecDataset/screw/train/good/");
-	TrainingAndTesting *trainer = new TrainingAndTesting();
-	cv::Ptr<cv::ml::SVM> svm_model = trainer->trainAndTest(dataset_sources, labels, light_pattern_file);
-	trainer->predict(img, light_pattern_file, svm_model);
-	*/
+	pretty_print(std::cout, jv); 
+	std::vector<std::string> cache_keys;
+	std::vector<std::string> cache_values;
+	add_config_to_cache(cache_keys, cache_values,jv);
+	for(auto key: cache_keys){
+		std::cout<<key<<" ";
+	}
+	std::cout<<std::endl;
+	for(auto value: cache_values){
+		std::cout<<value<<" ";
+	}
+	std::cout<<std::endl;
 	return 0;
 }
 
